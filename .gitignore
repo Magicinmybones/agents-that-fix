@@ -1,0 +1,22 @@
+# Local tooling and generated output
+node_modules/
+.wrangler/
+dist/
+coverage/
+
+# Secrets and local configuration
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+!.env.example
+
+# Logs and editor files
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agents That Fix</title>
+<meta name="description" content="AI-powered agents that live inside your workflow — lead response, follow-up, social listening and voice.">
+<style>
+/* ---------- Local fonts ---------- */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:block;src:url(assets/inter-variable.woff2) format("woff2");}
+@font-face{font-family:"Instrument Serif";font-style:italic;font-weight:400;font-display:block;src:url(assets/instrument-serif-italic.woff2) format("woff2");}
+
+/* ---------- Design tokens (sampled from reference) ---------- */
+:root{
+  color-scheme:dark;
+  --bg:#070707;            /* page background            rgb(7,7,7)   */
+  --card:#0f0f0f;          /* card fill                  rgb(15,15,15) */
+  --pill:#111111;          /* active tab pill            rgb(17,17,17) */
+  --hairline:rgba(255,255,255,.034); /* top inner highlight on cards/pill */
+  --white:#ffffff;
+  --text-lede:#cfcfcf;  /* intro paragraph */
+  --text-tab:#c6c6c6;    /* inactive tab   */
+  --text-body:#cbcbcb;  /* card body copy */
+  --accent:#f55a32;   /* "fix."          */
+  --eyebrow:#d36555; /* INVESTMENT      */
+  --ui:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Instrument Serif",ui-serif,Georgia,serif;
+
+  /* Design frame = reference @ 1x (1995 x 1479 css px, captured @2x = 3990 x 2958) */
+  --W:1995; --H:1479;
+}
+:root[data-theme="light"]{color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{
+  font-family:var(--ui);color:var(--white);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  text-rendering:geometricPrecision;font-optical-sizing:none;
+}
+h2,h3,p{margin:0;font-weight:inherit}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* =====================================================================
+   DESKTOP / LANDSCAPE  — proportional replica of the reference frame.
+   1 design px = var(--s). The frame fits the viewport (contain) with a
+   readability floor; any surplus height is absorbed by the card grid
+   (and a little by the section padding) so there is never empty space
+   above or below the section.
+   ===================================================================== */
+@media (min-width:1200px) and (min-aspect-ratio:11/10){
+  .agents{
+    container-type:inline-size;
+    min-height:100svh;
+    display:flex;justify-content:center;
+  }
+  .frame{
+    /* scale derived from the section's own width (container units), so a
+       classic scrollbar can never push the frame wider than the page */
+    --fit:min(calc(100cqw / var(--W)), calc(100svh / var(--H)));
+    --floor:min(calc(100cqw / var(--W)), .66px);
+    --s:max(var(--fit), var(--floor));
+    --extra:max(0px, calc(100svh - var(--H) * var(--s)));
+    width:calc(var(--W) * var(--s));
+    height:calc(var(--H) * var(--s) + var(--extra));
+    padding:calc(140.5 * var(--s) + var(--extra) * .12) 0 calc(136.8 * var(--s) + var(--extra) * .12);
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .eyebrow{
+    font-size:calc(23.33 * var(--s));line-height:1;letter-spacing:0.124em;
+    font-weight:400;font-variation-settings:"opsz" 23;
+    color:var(--eyebrow);text-transform:uppercase;
+    margin-right:calc(-0.124em); /* cancel trailing tracking so the word is optically centred */
+    transform:translateX(calc(0 * var(--s)));
+  }
+  .title{
+    margin-top:calc(36.1 * var(--s));
+    font-size:calc(78.2 * var(--s));line-height:1;font-weight:522;
+    font-variation-settings:"opsz" 32;letter-spacing:-0.0061em;white-space:nowrap;
+    transform:translateX(calc(-0.8 * var(--s)));
+  }
+  .title em{
+    font-family:var(--serif);font-style:italic;font-weight:400;color:var(--accent);
+    font-size:1.144em;letter-spacing:-0.036em;line-height:0;
+    font-variation-settings:normal;margin-left:0.014em;
+  }
+  .lede{
+    margin-top:calc(22.9 * var(--s));
+    font-size:calc(25.6 * var(--s));line-height:calc(37 * var(--s));
+    font-variation-settings:"opsz" 25;letter-spacing:0.012em;color:var(--text-lede);
+    text-align:center;white-space:nowrap;
+    transform:translateX(calc(0 * var(--s)));
+  }
+  .tabs{
+    margin-top:calc(43.15 * var(--s));
+    display:flex;gap:calc(11.75 * var(--s));
+    transform:translateX(calc(1 * var(--s)));
+  }
+  .tab{
+    height:calc(82 * var(--s));
+    padding:0 calc(34 * var(--s)) 0 calc(43.25 * var(--s));
+    border-radius:calc(12 * var(--s));
+    font-size:calc(26 * var(--s));line-height:1;font-variation-settings:"opsz" 25;
+    letter-spacing:0.006em;
+    padding-top:calc(1 * var(--s));
+  }
+  .tab::after{height:calc(2.5 * var(--s));width:calc(188 * var(--s));bottom:calc(.25 * var(--s))}
+  .tab-text{transform:translateX(calc(0 * var(--s)))}
+  .panels{margin-top:calc(44 * var(--s));flex:1 1 auto;width:100%;display:flex;justify-content:center;min-height:0}
+  .panel{
+    display:grid;
+    width:calc(1611.15 * var(--s));
+    transform:translateX(calc(0 * var(--s)));
+    grid-template-columns:calc(589 * var(--s)) calc(33.4 * var(--s)) calc(472 * var(--s)) calc(44.25 * var(--s)) calc(472.5 * var(--s));
+    grid-template-rows:minmax(calc(405.1 * var(--s)),405.1fr) calc(32.6 * var(--s)) minmax(calc(360.35 * var(--s)),360.35fr);
+  }
+  .card{border-radius:calc(12 * var(--s))}
+  .card .ico{width:calc(67.5 * var(--s));height:calc(67.5 * var(--s))}
+  .card h3{font-size:calc(40.5 * var(--s));line-height:1;font-weight:468;font-variation-settings:"opsz" 32;letter-spacing:-0.0211em}
+  .card p{letter-spacing:0.0092em}
+
+  .c-a{grid-column:1;grid-row:1 / 4;padding:0 calc(44.35 * var(--s)) calc(43.8 * var(--s)) calc(44.35 * var(--s))}
+  .c-a .ico{margin-top:auto}
+  .c-a h3{margin-top:calc(32.55 * var(--s))}
+  .c-a p{margin-top:calc(29.55 * var(--s));font-size:calc(23.2 * var(--s));line-height:calc(38 * var(--s));font-variation-settings:"opsz" 23}
+
+  .c-b{grid-column:3;grid-row:1;padding:calc(33.25 * var(--s)) calc(44.75 * var(--s)) 0}
+  .c-c{grid-column:5;grid-row:1;padding:calc(33.25 * var(--s)) calc(44.75 * var(--s)) 0}
+  .c-b h3,.c-c h3{margin-top:calc(25.8 * var(--s))}
+  .c-b p,.c-c p{margin-top:calc(24 * var(--s));font-size:calc(22.87 * var(--s));line-height:calc(36.1 * var(--s));font-variation-settings:"opsz" 23}
+
+  .c-d{grid-column:3 / 6;grid-row:3;padding:calc(33.25 * var(--s)) calc(44.75 * var(--s)) calc(32.45 * var(--s))}
+  .c-d h3{margin-top:auto}
+  .c-d p{margin-top:calc(36.7 * var(--s));font-size:calc(23.2 * var(--s));line-height:calc(37.75 * var(--s));font-variation-settings:"opsz" 23}
+  .card h3{min-height:0}
+  .c-d h3{padding-top:calc(0 * var(--s))}
+  /* precise per-icon nudges measured from the reference */
+  .c-a .ico{transform:translate(calc(-0.5 * var(--s)),0)}
+  .c-b .ico,.c-d .ico{transform:translate(calc(-1 * var(--s)),0)}
+  .c-c .ico{transform:translate(calc(0 * var(--s)),0)}
+  .c-b h3,.c-c h3,.c-d h3{transform:translateX(calc(-1 * var(--s)))}
+  .c-a h3{transform:translateX(calc(0 * var(--s)))}
+  .c-a p,.c-d p{letter-spacing:0.0007em}
+  .c-c > *{position:relative;top:calc(-0.5 * var(--s))}
+  .card p br.d{display:inline}
+  .lede br.d{display:inline}
+}
+
+/* =====================================================================
+   SHARED COMPONENT STYLES
+   ===================================================================== */
+.agents{position:relative;background:var(--bg);isolation:isolate}
+.frame{position:relative}
+.eyebrow,.title,.lede{text-align:center}
+.eyebrow{text-transform:uppercase;color:var(--eyebrow)}
+.title em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--accent)}
+.tabs{position:relative}
+.tab{
+  position:relative;display:inline-flex;align-items:center;justify-content:flex-start;white-space:nowrap;
+  color:var(--text-tab);transition:color .25s ease, background-color .25s ease, box-shadow .25s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.tab .tab-text{display:block}
+.tab::after{ /* ember underline */
+  content:"";position:absolute;left:50%;translate:-50% 0;border-radius:999px;
+  background:linear-gradient(90deg,rgba(255,150,120,0) 0%,rgba(255,155,130,.47) 50%,rgba(255,150,120,0) 100%);
+  opacity:0;transition:opacity .25s ease;
+}
+.tab[aria-selected="true"]{
+  color:var(--white);background:var(--pill);
+  box-shadow:inset 0 1px 0 var(--hairline),0 0 0 1px rgba(0,0,0,.28),0 0 6px rgba(0,0,0,.35);
+}
+.tab[aria-selected="true"]::after{opacity:1}
+@media (hover:hover){.tab:hover{color:var(--white)}}
+.tab:focus-visible{outline:2px solid rgba(255,120,80,.7);outline-offset:3px}
+
+.panel[hidden]{display:none!important}
+.panel{animation:panelIn .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+.panel.no-anim{animation:none}
+
+.card{
+  position:relative;overflow:hidden;display:flex;flex-direction:column;
+  background:var(--card);
+  box-shadow:inset 0 1px 0 var(--hairline),0 0 0 1px rgba(0,0,0,.30),0 0 6px rgba(0,0,0,.35);
+}
+.card h3{color:var(--white)}
+.card p{color:var(--text-body)}
+.card .ico{display:block;flex:none;overflow:visible}
+br.d{display:none}
+
+/* Featured gradient card — gradient field sampled from the reference
+   (text masked out, block-averaged, re-interpolated) + film grain. */
+.c-a{
+  background:#140707 url("assets/background-texture.svg") center / 100% 100% no-repeat;
+}
+.c-a > *{position:relative;z-index:1}
+.c-a p{color:var(--white)}
+
+/* =====================================================================
+   TABLET + MOBILE ARCHITECTURE
+   Everything below applies only when the desktop replica is NOT active,
+   so desktop stays locked. The same design system carries over: Inter
+   weights 522/468/400, the same tracking ratios, optical sizes, surfaces,
+   12px radii, hairline and ember underline. Only placement and scale change.
+
+   Breakpoints come from where the content fails, not from device sizes:
+   - Desktop (>=1200px landscape, locked): below this, a uniform scale
+     would push card copy under 14px.
+   - Tablet A (>=940px landscape): keeps the desktop bento with readability
+     floors. It holds until the two small agent columns drop below about
+     30 characters per line (~940px).
+   - Tablet B (>=660px, or portrait): featured column plus stacked agent
+     column. It holds until the featured column drops below the width its
+     title needs (~270px) with healthy gutters (~660px).
+   - Mobile (<660px): full-width featured card, 2x2 tab grid, agent cards
+     that pair up when there is room and otherwise use an icon-beside-title
+     header.
+   ===================================================================== */
+@media not all and (min-width:1200px) and (min-aspect-ratio:11/10){
+  .agents{container-type:inline-size;min-height:100svh;display:flex}
+  .frame{
+    width:100%;margin-inline:auto;
+    display:flex;flex-direction:column;align-items:center;
+    padding:var(--pt) max(var(--gut), env(safe-area-inset-right)) var(--pb) max(var(--gut), env(safe-area-inset-left));
+  }
+  /* type identity carried over from desktop */
+  .eyebrow{line-height:1;letter-spacing:.124em;margin-right:-.124em;font-variation-settings:"opsz" 23}
+  .title{font-weight:522;letter-spacing:-.0061em;font-variation-settings:"opsz" 32;text-wrap:balance}
+  .title em{font-size:1.144em;letter-spacing:-.036em;margin-left:.014em;line-height:0}
+  .lede{color:var(--text-lede);letter-spacing:.012em;font-variation-settings:"opsz" 25;text-wrap:balance}
+  .tabs-wrap{max-width:100%}
+  .tabs{display:flex}
+  .tab{
+    height:3.154em;border-radius:12px;line-height:1;
+    letter-spacing:.006em;font-variation-settings:"opsz" 25;
+  }
+  .tab::after{height:.096em;bottom:.01em}
+  .panels{width:100%;flex:1 1 auto;display:flex;min-height:0}
+  .panel{display:grid;width:100%}
+  .card{border-radius:12px}
+  .card .ico{width:var(--ico);height:var(--ico)}
+  .card h3{font-weight:468;letter-spacing:-.0211em;font-variation-settings:"opsz" 32;line-height:1.12;text-wrap:balance}
+  .card p{letter-spacing:.0092em;font-variation-settings:"opsz" 23;text-wrap:pretty}
+  .c-a p,.c-d p{letter-spacing:.0007em}
+  .c-a .ico{margin-top:auto}
+
+  /* -------------------------------------------------------------------
+     TABLET A — landscape, 940–1199px
+     Desktop bento kept: same column ratios and gap ratios as the reference
+     (589 : 33.4 : 472 : 44.25 : 472.5). Spacing keeps scaling with width;
+     type stops shrinking at readable floors and wraps naturally.
+     ------------------------------------------------------------------- */
+  @media (min-width:940px) and (min-aspect-ratio:11/10){
+    .frame{
+      --t:calc(100cqw / 1995);
+      --gut:clamp(28px, calc((100cqw - 940px) * .335 + 28px), 115px);
+      --pt:clamp(36px, min(calc(140.5 * var(--t)), 6.5svh), 84px);
+      --pb:clamp(32px, min(calc(136.8 * var(--t)), 6svh), 82px);
+      --ico:max(calc(67.5 * var(--t)), 34px);
+      --cpx:max(calc(44.75 * var(--t)), 20px);
+      --cpy:max(calc(33 * var(--t)), 18px);
+      min-height:100svh;
+    }
+    .eyebrow{font-size:max(calc(23.33 * var(--t)), 12.5px)}
+    .title{margin-top:max(calc(36.1 * var(--t)), 16px);font-size:max(calc(78.2 * var(--t)), 40px);line-height:1}
+    .lede{margin-top:max(calc(22.9 * var(--t)), 10px);font-size:max(calc(25.6 * var(--t)), 15px);line-height:1.445;max-width:36.4em}
+    .tabs-wrap{margin-top:max(calc(43.15 * var(--t)), 20px)}
+    .tabs{gap:max(calc(11.75 * var(--t)), 6px)}
+    .tab{font-size:max(calc(26 * var(--t)), 14.5px);padding-inline:1.663em 1.308em}
+    .tab::after{width:7.23em}
+    .panels{margin-top:max(calc(44 * var(--t)), 20px)}
+    .panel{
+      grid-template-columns:minmax(0,589fr) minmax(0,33.4fr) minmax(0,472fr) minmax(0,44.25fr) minmax(0,472.5fr);
+      grid-template-rows:minmax(min-content,405fr) max(calc(32.6 * var(--t)), 14px) minmax(min-content,360fr);
+    }
+    .c-a{grid-column:1;grid-row:1 / 4;padding:var(--cpx)}
+    .c-b{grid-column:3;grid-row:1}
+    .c-c{grid-column:5;grid-row:1}
+    .c-d{grid-column:3 / 6;grid-row:3}
+    .c-b,.c-c,.c-d{padding:var(--cpy) var(--cpx)}
+    .card h3{font-size:max(calc(40.5 * var(--t)), 20px)}
+    .c-a h3{margin-top:max(calc(32.55 * var(--t)), 16px)}
+    .c-a p{margin-top:max(calc(29.55 * var(--t)), 12px);font-size:max(calc(23.2 * var(--t)), 14px);line-height:1.638}
+    .c-b h3,.c-c h3{margin-top:max(calc(25.8 * var(--t)), 14px)}
+    .c-b p,.c-c p{margin-top:max(calc(24 * var(--t)), 10px);font-size:max(calc(22.87 * var(--t)), 14px);line-height:1.578}
+    .c-d h3{margin-top:auto;padding-top:max(calc(24 * var(--t)), 14px)}
+    .c-d p{margin-top:max(calc(36.7 * var(--t)), 12px);font-size:max(calc(23.2 * var(--t)), 14px);line-height:1.627}
+  }
+
+  /* -------------------------------------------------------------------
+     TABLET B — 660–939px, plus portrait tablets of any width
+     The tall gradient feature stays the left anchor; the three agent
+     cards stack beside it, so every line keeps a comfortable measure.
+     ------------------------------------------------------------------- */
+  @media (min-width:660px) and (max-width:939.98px), (min-width:940px) and (max-aspect-ratio:1099/1000){
+    .frame{
+      --gut:clamp(24px, 4.6cqw, 48px);
+      --pt:clamp(48px, 7cqw, 80px);
+      --pb:clamp(40px, 6cqw, 72px);
+      --ico:clamp(34px, 4.4cqw, 44px);
+      --cpx:clamp(20px, 3cqw, 30px);
+      --cpy:clamp(18px, 2.6cqw, 26px);
+      min-height:100svh;
+    }
+    .eyebrow{font-size:clamp(12.5px, 1.6cqw, 14px)}
+    .title{margin-top:clamp(16px, 2.4cqw, 24px);font-size:clamp(40px, 5.4cqw, 56px);line-height:1.04}
+    .lede{margin-top:clamp(12px, 1.9cqw, 18px);font-size:clamp(15px, 1.9cqw, 17px);line-height:1.5;max-width:36.4em}
+    .tabs-wrap{margin-top:clamp(26px, 4.2cqw, 40px)}
+    .tabs{gap:clamp(4px, .8cqw, 8px)}
+    .tab{font-size:clamp(14px, 1.95cqw, 16px);padding-inline:clamp(.95em, 2cqw, 1.663em) clamp(.75em, 1.6cqw, 1.308em)}
+    .tab::after{width:66%}
+    .panels{margin-top:clamp(24px, 3.6cqw, 36px)}
+    .panel{
+      grid-template-columns:minmax(0,.86fr) minmax(0,1fr);
+      grid-template-rows:repeat(3, minmax(min-content,1fr));
+      gap:clamp(12px, 1.8cqw, 18px);
+    }
+    .c-a{grid-column:1;grid-row:1 / 4;padding:var(--cpx)}
+    .c-b{grid-column:2;grid-row:1}
+    .c-c{grid-column:2;grid-row:2}
+    .c-d{grid-column:2;grid-row:3}
+    .c-b,.c-c,.c-d{padding:var(--cpy) var(--cpx)}
+    .card h3{font-size:clamp(20px, 2.7cqw, 24px);margin-top:clamp(14px, 2cqw, 20px)}
+    .card p{margin-top:clamp(8px, 1.3cqw, 12px);font-size:clamp(14.5px, 1.8cqw, 15.5px);line-height:1.55}
+    .c-a h3{margin-top:clamp(16px, 2.4cqw, 24px)}
+    .c-d h3{margin-top:auto;padding-top:clamp(14px, 2cqw, 20px)}
+  }
+
+  /* -------------------------------------------------------------------
+     MOBILE — under 660px
+     All four tabs stay visible in a 2x2 grid with no hidden scroll strip.
+     The featured card leads at full width. The panel is a size container:
+     when there is room for two ~248px columns, Follow-up and Social
+     Listening sit side by side; otherwise the agent cards put the icon
+     beside the title to keep the reading flow compact.
+     ------------------------------------------------------------------- */
+  @media (max-width:659.98px){
+    .frame{
+      --gut:clamp(16px, 5.2cqw, 28px);
+      --pt:clamp(44px, 12cqw, 64px);
+      --pb:clamp(36px, 10cqw, 56px);
+      --ico:clamp(34px, 9.4cqw, 40px);
+      --cpx:clamp(18px, 5.4cqw, 26px);
+      --cpy:clamp(20px, 5.6cqw, 26px);
+    }
+    .eyebrow{font-size:clamp(12px, 3.2cqw, 13.5px)}
+    .title{margin-top:clamp(12px, 3.6cqw, 18px);font-size:clamp(32px, 9.4cqw, 42px);line-height:1.05}
+    .lede{margin-top:clamp(12px, 3.4cqw, 18px);font-size:clamp(15px, 4cqw, 16px);line-height:1.55;max-width:34em}
+    .tabs-wrap{width:100%;margin-top:clamp(24px, 7cqw, 36px)}
+    .tabs{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:6px;width:100%}
+    .tab{height:46px;justify-content:center;padding-inline:6px;font-size:clamp(13px, 3.7cqw, 15px)}
+    .tab::after{width:58%}
+    .panels{margin-top:clamp(20px, 6cqw, 32px)}
+    .panel{
+      container:panel / inline-size;
+      grid-template-columns:repeat(auto-fit, minmax(min(100%, 248px), 1fr));
+      gap:12px;
+    }
+    .c-a,.c-d{grid-column:1 / -1}
+    .c-a{min-height:clamp(300px, 86cqw, 420px);padding:clamp(22px, 6cqw, 28px)}
+    .c-b,.c-c,.c-d{padding:var(--cpy) var(--cpx)}
+    .card h3{font-size:clamp(19px, 5.4cqw, 22px)}
+    .card p{font-size:15px;line-height:1.55;margin-top:10px}
+    .c-a h3{margin-top:clamp(16px, 4.6cqw, 22px);font-size:clamp(21px, 6cqw, 24px)}
+    .c-a p{margin-top:12px}
+    /* agent card header: icon beside title */
+    .c-b,.c-c,.c-d{display:grid;grid-template-columns:var(--ico) minmax(0,1fr);column-gap:14px;align-items:center}
+    .c-b h3,.c-c h3,.c-d h3{margin:0}
+    .c-b p,.c-c p,.c-d p{grid-column:1 / -1;margin-top:14px}
+    /* two agent cards fit side by side: return them to the stacked icon-on-top card */
+    @container panel (min-width:508px){
+      .c-b,.c-c{display:flex;flex-direction:column;align-items:stretch}
+      .c-b h3,.c-c h3{margin-top:16px}
+      .c-b p,.c-c p{margin-top:10px}
+    }
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .panel{animation:none}
+  .tab,.tab::after{transition:none}
+}
+</style>
+</head>
+<body>
+<section class="agents" aria-labelledby="agents-title">
+  <div class="frame">
+    <p class="eyebrow">Investment</p>
+    <h2 class="title" id="agents-title">The agents that do the <em>fix.</em></h2>
+    <p class="lede">We don't just "connect apps." We build AI-powered agents that live inside your <br class="d">workflow, making decisions and executing tasks with 100% precision.</p>
+
+    <div class="tabs-wrap">
+    <div class="tabs" role="tablist" aria-label="Agent categories">
+      <button class="tab" role="tab" id="t-lead" aria-controls="p-lead" aria-selected="true"><span class="tab-text">Lead &amp; Sales</span></button>
+      <button class="tab" role="tab" id="t-ops" aria-controls="p-ops" aria-selected="false" tabindex="-1"><span class="tab-text">Client Operations</span></button>
+      <button class="tab" role="tab" id="t-sup" aria-controls="p-sup" aria-selected="false" tabindex="-1"><span class="tab-text">Support &amp; Knowledge</span></button>
+      <button class="tab" role="tab" id="t-cus" aria-controls="p-cus" aria-selected="false" tabindex="-1"><span class="tab-text">Custom Builds</span></button>
+    </div>
+    </div>
+
+    <div class="panels">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<linearGradient id='gAst' x1='.62' y1='0' x2='.42' y2='1'><stop offset='0' stop-color='#fcf6ee'/><stop offset='.07' stop-color='#faefe3'/><stop offset='.415' stop-color='#f78c6b'/><stop offset='.5' stop-color='#fb7c52'/><stop offset='.6' stop-color='#fa7a4e'/><stop offset='.94' stop-color='#f25d39'/><stop offset='1' stop-color='#f05834'/></linearGradient><linearGradient id='gPin' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='135' y2='135'><stop offset='0' stop-color='#fde6dc'/><stop offset='.08' stop-color='#fbc7b3'/><stop offset='.25' stop-color='#f98d66'/><stop offset='.48' stop-color='#f9663a'/><stop offset='.91' stop-color='#fc4718'/><stop offset='1' stop-color='#fc4214'/></linearGradient><linearGradient id='gBolt' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#f2f3f2'/><stop offset='.08' stop-color='#f0f0ef'/><stop offset='.46' stop-color='#fbb9a6'/><stop offset='.9' stop-color='#e77556'/><stop offset='1' stop-color='#e46c4c'/></linearGradient><linearGradient id='gBowlT' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#f78052'/><stop offset='1' stop-color='#fd6634'/></linearGradient><linearGradient id='gBowlB' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#fb5420'/><stop offset='1' stop-color='#fc5421'/></linearGradient><radialGradient id='hBowlT' cx='1' cy='0' r='.62'><stop offset='0' stop-color='#fff6f6' stop-opacity='1'/><stop offset='.25' stop-color='#fff4f4' stop-opacity='.82'/><stop offset='1' stop-color='#fff4f4' stop-opacity='0'/></radialGradient><radialGradient id='hBowlB' cx='1' cy='0' r='.55'><stop offset='0' stop-color='#fff0ea' stop-opacity='.5'/><stop offset='1' stop-color='#fff0ea' stop-opacity='0'/></radialGradient>
+</defs></svg>
+      <div class="panel" role="tabpanel" id="p-lead" aria-labelledby="t-lead">
+        <article class="card c-a">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><g stroke="url(#gAst)" stroke-width="12" stroke-linecap="round" fill="none"><path d="M67.5 6.5V128.5M6.5 67.5H128.5M24.37 24.37L110.63 110.63M110.63 24.37L24.37 110.63"/></g></svg>
+          <h3>Lead Response Agent</h3>
+          <p>Instantly responds to incoming leads with <br class="d">personalized messages, qualifying them <br class="d">automatically and routing to your team.</p>
+        </article>
+        <article class="card c-b">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><g fill="url(#gPin)"><path d="M0 67.5V0A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M67.5 0H135A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M135 67.5V135A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M67.5 135H0A67.5 67.5 0 0 1 67.5 67.5Z"/><circle cx="67.5" cy="67.5" r="2.5"/></g></svg>
+          <h3>Follow-up Agent</h3>
+          <p>5-step automated sequences that <br class="d">run until the lead books, buys, or <br class="d">says no. Reply detection stops the <br class="d">sequence the moment they <br class="d">respond.</p>
+        </article>
+        <article class="card c-c">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><path d="M75.5 0.5L-0.5 76.5H32.5L17.5 134.5L91.5 56.5H59Z" fill="url(#gBolt)"/></svg>
+          <h3>Social Listening Agent</h3>
+          <p>Monitors Reddit, LinkedIn, and X for <br class="d">buying signals. Alerts your team <br class="d">within 5 minutes with context and a <br class="d">suggested outreach message.</p>
+        </article>
+        <article class="card c-d">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><path d="M0 0H135A67.5 67.5 0 0 1 0 0Z" fill="url(#gBowlT)"/><path d="M0 0H135A67.5 67.5 0 0 1 0 0Z" fill="url(#hBowlT)"/><path d="M0 67.5H135A67.5 67.5 0 0 1 0 67.5Z" fill="url(#gBowlB)"/><path d="M0 67.5H135A67.5 67.5 0 0 1 0 67.5Z" fill="url(#hBowlB)"/></svg>
+          <h3>AI Voice Agent</h3>
+          <p>Picks up calls, qualifies the caller, books appointments, answers FAQs, and routes <br class="d">complex calls to the right team member with a live summary. Every call transcribed <br class="d">and logged automatically.</p>
+        </article>
+      </div>
+      <div class="panel" role="tabpanel" id="p-ops" aria-labelledby="t-ops" hidden>
+        <article class="card c-a">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><g stroke="url(#gAst)" stroke-width="12" stroke-linecap="round" fill="none"><path d="M67.5 6.5V128.5M6.5 67.5H128.5M24.37 24.37L110.63 110.63M110.63 24.37L24.37 110.63"/></g></svg>
+          <h3>Onboarding Agent</h3>
+          <p>Turns a signed contract into a fully set-up client: workspace created, kickoff booked and documents collected, with no handoffs dropped.</p>
+        </article>
+        <article class="card c-b">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><g fill="url(#gPin)"><path d="M0 67.5V0A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M67.5 0H135A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M135 67.5V135A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M67.5 135H0A67.5 67.5 0 0 1 67.5 67.5Z"/><circle cx="67.5" cy="67.5" r="2.5"/></g></svg>
+          <h3>Status Update Agent</h3>
+          <p>Pulls progress from your tools and sends every client a clear weekly update, so nobody has to ask where things stand.</p>
+        </article>
+        <article class="card c-c">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><path d="M75.5 0.5L-0.5 76.5H32.5L17.5 134.5L91.5 56.5H59Z" fill="url(#gBolt)"/></svg>
+          <h3>Billing Agent</h3>
+          <p>Raises invoices on milestones, chases overdue payments politely, and reconciles every payment back to your CRM.</p>
+        </article>
+        <article class="card c-d">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><path d="M0 0H135A67.5 67.5 0 0 1 0 0Z" fill="url(#gBowlT)"/><path d="M0 0H135A67.5 67.5 0 0 1 0 0Z" fill="url(#hBowlT)"/><path d="M0 67.5H135A67.5 67.5 0 0 1 0 67.5Z" fill="url(#gBowlB)"/><path d="M0 67.5H135A67.5 67.5 0 0 1 0 67.5Z" fill="url(#hBowlB)"/></svg>
+          <h3>Scheduling Agent</h3>
+          <p>Coordinates calendars across your team and clients, handles reschedules, sends reminders, and files every meeting note in one place.</p>
+        </article>
+      </div>
+      <div class="panel" role="tabpanel" id="p-sup" aria-labelledby="t-sup" hidden>
+        <article class="card c-a">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><g stroke="url(#gAst)" stroke-width="12" stroke-linecap="round" fill="none"><path d="M67.5 6.5V128.5M6.5 67.5H128.5M24.37 24.37L110.63 110.63M110.63 24.37L24.37 110.63"/></g></svg>
+          <h3>Support Desk Agent</h3>
+          <p>Answers tickets across email and chat from your own docs, resolving routine questions instantly and escalating the rest with full context.</p>
+        </article>
+        <article class="card c-b">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><g fill="url(#gPin)"><path d="M0 67.5V0A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M67.5 0H135A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M135 67.5V135A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M67.5 135H0A67.5 67.5 0 0 1 67.5 67.5Z"/><circle cx="67.5" cy="67.5" r="2.5"/></g></svg>
+          <h3>Knowledge Agent</h3>
+          <p>Turns resolved tickets, calls and SOPs into searchable answers your team and customers can trust.</p>
+        </article>
+        <article class="card c-c">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><path d="M75.5 0.5L-0.5 76.5H32.5L17.5 134.5L91.5 56.5H59Z" fill="url(#gBolt)"/></svg>
+          <h3>Triage Agent</h3>
+          <p>Tags, prioritizes and routes every request to the right owner in seconds, with SLA alerts before anything slips.</p>
+        </article>
+        <article class="card c-d">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><path d="M0 0H135A67.5 67.5 0 0 1 0 0Z" fill="url(#gBowlT)"/><path d="M0 0H135A67.5 67.5 0 0 1 0 0Z" fill="url(#hBowlT)"/><path d="M0 67.5H135A67.5 67.5 0 0 1 0 67.5Z" fill="url(#gBowlB)"/><path d="M0 67.5H135A67.5 67.5 0 0 1 0 67.5Z" fill="url(#hBowlB)"/></svg>
+          <h3>Internal Q&amp;A Agent</h3>
+          <p>Lives in Slack or Teams and answers your team's questions about policy, pricing and process, always citing the source document.</p>
+        </article>
+      </div>
+      <div class="panel" role="tabpanel" id="p-cus" aria-labelledby="t-cus" hidden>
+        <article class="card c-a">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><g stroke="url(#gAst)" stroke-width="12" stroke-linecap="round" fill="none"><path d="M67.5 6.5V128.5M6.5 67.5H128.5M24.37 24.37L110.63 110.63M110.63 24.37L24.37 110.63"/></g></svg>
+          <h3>Bespoke Agent</h3>
+          <p>Designed around the one workflow that costs you the most time. We map it, build it, and run it with you until it is bulletproof.</p>
+        </article>
+        <article class="card c-b">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><g fill="url(#gPin)"><path d="M0 67.5V0A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M67.5 0H135A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M135 67.5V135A67.5 67.5 0 0 1 67.5 67.5Z"/><path d="M67.5 135H0A67.5 67.5 0 0 1 67.5 67.5Z"/><circle cx="67.5" cy="67.5" r="2.5"/></g></svg>
+          <h3>Data Sync Agent</h3>
+          <p>Keeps CRMs, spreadsheets and databases in step, cleaning and de-duplicating records as they move.</p>
+        </article>
+        <article class="card c-c">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><path d="M75.5 0.5L-0.5 76.5H32.5L17.5 134.5L91.5 56.5H59Z" fill="url(#gBolt)"/></svg>
+          <h3>Reporting Agent</h3>
+          <p>Assembles the numbers you check every Monday and delivers a plain-English summary before your first coffee.</p>
+        </article>
+        <article class="card c-d">
+          <svg class="ico" viewBox="0 0 135 135" aria-hidden="true"><path d="M0 0H135A67.5 67.5 0 0 1 0 0Z" fill="url(#gBowlT)"/><path d="M0 0H135A67.5 67.5 0 0 1 0 0Z" fill="url(#hBowlT)"/><path d="M0 67.5H135A67.5 67.5 0 0 1 0 67.5Z" fill="url(#gBowlB)"/><path d="M0 67.5H135A67.5 67.5 0 0 1 0 67.5Z" fill="url(#hBowlB)"/></svg>
+          <h3>Document Agent</h3>
+          <p>Reads contracts, invoices and forms, extracts the fields that matter, and files everything where it belongs, with a human review step when confidence is low.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  function select(t,focus){
+    tabs.forEach(function(x){
+      var on=x===t;x.setAttribute('aria-selected',on);x.tabIndex=on?0:-1;
+      var p=document.getElementById(x.getAttribute('aria-controls'));
+      if(on){p.hidden=false;p.classList.remove('no-anim');void p.offsetWidth;}else{p.hidden=true;}
+    });
+    if(focus)t.focus();
+    t.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){select(t)});
+    t.addEventListener('keydown',function(e){
+      var k=e.key,n=null;
+      if(k==='ArrowRight')n=tabs[(i+1)%tabs.length];
+      else if(k==='ArrowLeft')n=tabs[(i-1+tabs.length)%tabs.length];
+      else if(k==='Home')n=tabs[0];else if(k==='End')n=tabs[tabs.length-1];
+      if(n){e.preventDefault();select(n,true)}
+    });
+  });
+})();
+</script>
+</body>
+</html>
