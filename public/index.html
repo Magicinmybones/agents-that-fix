@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Agents That Fix</title>
 <meta name="description" content="AI-powered agents that live inside your workflow — lead response, follow-up, social listening and voice.">
+<script>
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.classList.add('entrance-running');
+}
+</script>
 <style>
 /* ---------- Local fonts ---------- */
 @font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:block;src:url(assets/inter-variable.woff2) format("woff2");}
@@ -160,14 +165,14 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cu
 .tabs{position:relative}
 .tab{
   position:relative;display:inline-flex;align-items:center;justify-content:flex-start;white-space:nowrap;
-  color:var(--text-tab);transition:color .25s ease, background-color .25s ease, box-shadow .25s ease;
+  color:var(--text-tab);
   -webkit-tap-highlight-color:transparent;
 }
 .tab .tab-text{display:block}
 .tab::after{ /* ember underline */
   content:"";position:absolute;left:50%;translate:-50% 0;border-radius:999px;
   background:linear-gradient(90deg,rgba(255,150,120,0) 0%,rgba(255,155,130,.47) 50%,rgba(255,150,120,0) 100%);
-  opacity:0;transition:opacity .25s ease;
+  opacity:0;
 }
 .tab[aria-selected="true"]{
   color:var(--white);background:var(--pill);
@@ -178,9 +183,35 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cu
 .tab:focus-visible{outline:2px solid rgba(255,120,80,.7);outline-offset:3px}
 
 .panel[hidden]{display:none!important}
-.panel{animation:panelIn .45s cubic-bezier(.2,.7,.2,1)}
-@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
-.panel.no-anim{animation:none}
+
+/* One opening composition: context, statement, explanation, then the agent grid.
+   The featured card's textured background remains visible and completely still. */
+@keyframes entrance-label{
+  from{opacity:0;translate:0 5px}
+  to{opacity:1;translate:none}
+}
+@keyframes entrance-heading{
+  from{opacity:.25;clip-path:inset(100% 0 0 0)}
+  to{opacity:1;clip-path:inset(0 0 0 0)}
+}
+@keyframes entrance-copy{
+  from{opacity:0;translate:0 8px}
+  to{opacity:1;translate:none}
+}
+@keyframes entrance-card{
+  from{opacity:0;translate:0 12px;scale:.985}
+  to{opacity:1;translate:none;scale:1}
+}
+.entrance-running .eyebrow{animation:entrance-label .42s cubic-bezier(.2,.7,.2,1) .06s both}
+.entrance-running .title{animation:entrance-heading .86s cubic-bezier(.16,1,.3,1) .2s both}
+.entrance-running .lede{animation:entrance-copy .62s cubic-bezier(.22,1,.36,1) .58s both}
+.entrance-running .tabs-wrap{animation:entrance-copy .55s cubic-bezier(.22,1,.36,1) .86s both}
+.entrance-running #p-lead .c-a > .ico{animation:entrance-copy .55s cubic-bezier(.22,1,.36,1) 1.08s both}
+.entrance-running #p-lead .c-a > h3{animation:entrance-copy .56s cubic-bezier(.22,1,.36,1) 1.16s both}
+.entrance-running #p-lead .c-a > p{animation:entrance-copy .56s cubic-bezier(.22,1,.36,1) 1.24s both}
+.entrance-running #p-lead .c-b{animation:entrance-card .68s cubic-bezier(.22,1,.36,1) 1.18s both}
+.entrance-running #p-lead .c-c{animation:entrance-card .68s cubic-bezier(.22,1,.36,1) 1.28s both}
+.entrance-running #p-lead .c-d{animation:entrance-card .68s cubic-bezier(.22,1,.36,1) 1.42s both}
 
 .card{
   position:relative;overflow:hidden;display:flex;flex-direction:column;
@@ -381,8 +412,10 @@ br.d{display:none}
 }
 
 @media (prefers-reduced-motion:reduce){
-  .panel{animation:none}
-  .tab,.tab::after{transition:none}
+  .entrance-running .eyebrow,.entrance-running .title,.entrance-running .lede,
+  .entrance-running .tabs-wrap,.entrance-running #p-lead .c-a > *,
+  .entrance-running #p-lead .c-b,.entrance-running #p-lead .c-c,
+  .entrance-running #p-lead .c-d{animation:none}
 }
 </style>
 </head>
@@ -500,15 +533,29 @@ br.d{display:none}
 
 <script>
 (function(){
+  var root=document.documentElement;
+  var cleanupTimer;
+  function finishEntrance(){
+    clearTimeout(cleanupTimer);
+    root.classList.remove('entrance-running');
+  }
+  if(root.classList.contains('entrance-running')){
+    var lastCard=document.querySelector('#p-lead .c-d');
+    cleanupTimer=setTimeout(finishEntrance,2300);
+    lastCard.addEventListener('animationend',function(event){
+      if(event.target===lastCard)finishEntrance();
+    },{once:true});
+  }
   var tabs=[].slice.call(document.querySelectorAll('.tab'));
   function select(t,focus){
+    finishEntrance();
     tabs.forEach(function(x){
       var on=x===t;x.setAttribute('aria-selected',on);x.tabIndex=on?0:-1;
       var p=document.getElementById(x.getAttribute('aria-controls'));
-      if(on){p.hidden=false;p.classList.remove('no-anim');void p.offsetWidth;}else{p.hidden=true;}
+      p.hidden=!on;
     });
     if(focus)t.focus();
-    t.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+    t.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});
   }
   tabs.forEach(function(t,i){
     t.addEventListener('click',function(){select(t)});
